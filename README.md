@@ -1,39 +1,108 @@
-# 📚 **text-rewriter-python**
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-welcome to the text-rewriter-python repository! this open-source collaboration is designed for anyone to fork and improve.
+#%%
+# read the data file into a dataframe
+df = pd.read_csv(r'D:\Lectures\Industrial AI\machine_data-1.csv')
+print(df)
 
-**description:**
-the `text-rewriter-python` repository is a python project that provides a text rewriting functionality. it aims to create a python tool that can rewrite ai-generated text. by following the provided steps, you can install the tool, import the necessary libraries (`nltk` and `textblob`), and utilize the `humanize_text` function to rewrite the ai-generated text into a more human-like version.
+print(df.shape)
 
-**contributions:**
-we encourage developers and enthusiasts to contribute to this project in any way they can. whether it's improving the text rewriting algorithms, enhancing the user interface, or adding new features, your contributions are highly appreciated! to contribute, you can fork the repository and submit a pull request with your changes.
+#%%
+if 'Unnamed: 0' in df.columns:
+    df = df.drop(columns=['Unnamed: 0'])
 
-**license:**
-this project is licensed under the mit license. see the license file for details.
 
-this tool utilizes the natural language toolkit (nltk) and textblob libraries, which make natural language processing in python accessible to everyone. we extend our gratitude to the developers of these libraries for their valuable contributions.
 
-repository structure:
-- readme.md
-- text_rewriter.py
+#%%
 
-to get started with the tool, follow these steps:
+#%%
+"""
+Extract data for a given manufacturer
+"""
+grpByManu = df.groupby(['manufacturef'])
 
-1. install python 3 on your computer if it's not already installed.
-2. download or clone the repository.
-3. install the required libraries by running `pip install nltk textblob` in your terminal.
-4. open the python file (`text_rewriter.py`) in your preferred code editor.
-5. import the `nltk` and `textblob` libraries at the beginning of the file.
-6. copy and paste the `humanize_text` function from the code snippet into your file.
-7. call the `humanize_text` function with the ai-generated text as the argument.
-8. the function will return the humanized text.
+dfa = grpByManu.get_group(('A',))
 
-here's an example of how to use the tool:
+print(dfa)
 
-```
-$ python3 text_rewriter.py
-enter ai-generated text: the quick brown fox jumped over the lazy dog.
-the amazing brown fox really jumped over the lazy dog.
-```
 
-we appreciate your interest and contributions to the `text-rewriter-python` project. feel free to reach out if you have any questions or need further assistance.
+
+
+#%%
+
+loada = dfa['load']
+timea = dfa['time']
+
+
+
+
+
+#%%
+
+'''
+Is there a relationship between load and time
+'''
+plt.scatter(loada, timea)
+plt.title("Relation between load and time")
+plt.xlabel("Load")
+plt.ylabel("Time")
+plt.show()
+
+
+
+
+
+#%%
+'''
+Characteristics of data
+mean, median, mode
+'''
+
+# Calculate and assign mean, median, and mode for load
+mode = dfa['load'].mode()[0]  # Get the mode
+median = dfa['load'].median()  # Get the median
+mean = dfa['load'].mean()  # Get the mean
+
+# Print the values
+print(f"Mode: {round(mode, 2)}")
+print(f"Median: {round(median, 2)}")
+print(f"Mean: {round(mean, 2)}")
+
+# Relationship between mode, median, and mean
+if mean == median == mode:
+    print("\nData may follow a Normal distribution.")
+elif mode < median < mean:
+    print("\nData may follow an Exponential or Weibull distribution (β < 1).")
+elif mode > median > mean:
+    print("\nData may follow a left-skewed distribution (possibly Weibull with β > 1).")
+else:
+    print("\nThis is an unusual distribution.")
+
+
+#%% 
+# Define the new_func function to plot the histogram
+def new_func(dfa):
+    dfa[['load']].plot(kind='hist', bins=10, edgecolor='black')
+    plt.title('Histogram of Load')
+    plt.xlabel('Load')
+    plt.ylabel('Frequency')
+    plt.show()
+
+# Call the new_func function
+new_func(dfa)
+
+#%%
+variance = dfa['load'].var()  # Variance
+std_dev = dfa['load'].std() # std
+
+print(f"Variance: {round(variance, 2)}")
+print(f"Standard Deviation: {round(std_dev, 2)}")
+
+six_sigma_upper = mean + 6 * std_dev
+six_sigma_lower = mean - 6 * std_dev
+print(f"6 Sigma Range: ({round(six_sigma_lower, 2)}, {round(six_sigma_upper, 2)})")
+
+
+#%%
